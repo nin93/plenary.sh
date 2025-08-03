@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/env -S bash
 
 function sync {
   emerge --sync
@@ -6,7 +6,7 @@ function sync {
 
 function update {
   emerge \
-    --verbose --quiet --deep --newuse --changed-use --update --usepkg --with-bdeps=y \
+    --verbose --quiet --deep --newuse --changed-use --update --getbinpkg --with-bdeps=y \
     --autounmask-write --autounmask-use=y --autounmask-license=y --keep-going \
     @world
 }
