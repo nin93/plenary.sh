@@ -1,40 +1,45 @@
 #!/bin/env -S bash
 
+function usage {
+	cat << EOF
+Usage: $PROGRAM [...OPTIONS]
+
+Scripts installer.
+
+OPTIONS
+  -b, --binpath          set the installation path for scripts, default: /usr/local/bin
+      --keep-extension   keep .sh extension for installed scripts
+  -h, --help             print this help message
+EOF
+}
+
 function die {
   echo "$*" >&2;
-  exit 2;
+  usage >&2
+
+  exit 1;
 } 
 
 function main {
-  if ! options=$(getopt -u -o "b:" -l "binpath:,keep-extension" -- "$@"); then
+  if ! options=$(getopt -o "b:" -l "binpath:,keep-extension" -- "$@"); then
     die
   fi
 
-  set -- $options
+  eval set -- $options
 
   while [ $# -gt 0 ]; do
     case $1 in
       -b|--binpath)
-        local binpath=$2
-        shift
-        ;;
+        local binpath=$2; shift 2;;
       --keep-extension)
-        local keep_extension=y
-        shift
-        ;;
-      (--)
-        shift
-        break
-        ;;
-      (-*)
-        die "$0: error - unrecognized option $1"
-        ;;
-      (*)
-        break
-        ;;
+        local keep_extension=y; shift 2;;
+      --)
+        shift; break;;
+      -*)
+        die "$0: error - unrecognized option $1";;
+      *)
+        break;;
     esac
-
-    shift
   done
   
   binpath="${binpath:-/usr/local/bin/}"
@@ -53,4 +58,4 @@ function main {
   done
 }
 
-main $@
+main "$@"
