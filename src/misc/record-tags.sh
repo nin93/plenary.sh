@@ -1,33 +1,33 @@
 #!/bin/env -S bash
 
-PROGRAM='record-tags'
+PROGRAM="record-tags"
 
 function usage {
-	cat << EOF
-Usage: $PROGRAM [...OPTIONS] [TRACKLIST_DIR]
+	cat <<-EOF
+		Usage: $PROGRAM [...OPTIONS] [TRACKLIST_DIR]
 
-Map the mp3 metadata values for a list of mp3 files. Track number is read from files
-if the filename starts with a number. 
+		Map the mp3 metadata values for a list of mp3 files. Track number is read from files
+		if the filename starts with a number. 
 
-When TRACKLIST_DIR is omitted the list is retrieved from the current working directory,
-if it is - then stdin is read.
+		When TRACKLIST_DIR is omitted the list is retrieved from the current working directory,
+		if it is - then stdin is read.
 
-OPTIONS
-  -a, --artist    set the metadata values for artist, composer, performer
-  -r, --album     set the metadata value for the album title
-  -g, --genre     set the metadata value for the genre
-  -y, --year      set the metadata value for the release year
-  -p, --artwork   set the artwork for this album
-  -h, --help      print this help message
-EOF
+		OPTIONS
+		  -a, --artist    set the metadata values for artist, composer, performer
+		  -r, --album     set the metadata value for the album title
+		  -g, --genre     set the metadata value for the genre
+		  -y, --year      set the metadata value for the release year
+		  -p, --artwork   set the artwork for this album
+		  -h, --help      print this help message
+	EOF
 }
 
 function die {
-  echo "$*" >&2
-  usage >&2
+	echo "$*" >&2
+	usage >&2
 
-  exit 1
-} 
+	exit 1
+}
 
 function get_files {
 	if [[ "$1" != '-' ]]; then
@@ -38,30 +38,52 @@ function get_files {
 }
 
 function main() {
-  if ! options=$(getopt -o "a:r:g:y:p:h" -l "artist:,album:,genre:,year:,artwork:help" -- "$@"); then
-    die
-  fi
+	if ! options=$(getopt -o "a:r:g:y:p:h" -l "artist:,album:,genre:,year:,artwork:help" -- "$@"); then
+		die
+	fi
 
-  eval set -- $options
+	eval set -- $options
 
-  while [ $# -gt 0 ]; do
+	while [ $# -gt 0 ]; do
 		case "$1" in
-			-a|--artist)
-				local artist="$2"; shift 2;;
-			-r|--album)
-				local album="$2"; shift 2;;
-			-g|--genre)
-				local genre="$2"; shift 2;;
-			-y|--year)
-				local year="$2"; shift 2;;
-			-p|--artwork)
-				local artwork="$2"; shift 2;;
-			-h|--help)
-				usage; exit 0;;
-			--)
-				shift; break;;
-      -*)
-      	die "$PROGRAM: error - unrecognized option $1";;
+		-a | --artist)
+			local artist="$2"
+			shift 2
+			;;
+
+		-r | --album)
+			local album="$2"
+			shift 2
+			;;
+
+		-g | --genre)
+			local genre="$2"
+			shift 2
+			;;
+
+		-y | --year)
+			local year="$2"
+			shift 2
+			;;
+
+		-p | --artwork)
+			local artwork="$2"
+			shift 2
+			;;
+
+		-h | --help)
+			usage
+			exit 0
+			;;
+
+		--)
+			shift
+			break
+			;;
+
+		-*)
+			die "$PROGRAM: error - unrecognized option $1"
+			;;
 		esac
 	done
 
@@ -117,8 +139,8 @@ function main() {
 			ffmpeg_opts+=("-metadata track=$index")
 		fi
 
-		eval ffmpeg "${ffmpeg_opts[@]}" "$ftemp" >/dev/null 2>&1 \
-			&& mv "$ftemp" "$file"
+		eval ffmpeg "${ffmpeg_opts[@]}" "$ftemp" >/dev/null 2>&1 &&
+			mv "$ftemp" "$file"
 	done
 }
 
