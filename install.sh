@@ -71,7 +71,8 @@ function main {
 		esac
 	done
 
-	binpath="${OPT_BINPATH:-${HOME}/bin/}"
+	# use eval to expand `~` from `OPT_BINPATH`
+	eval binpath="${OPT_BINPATH:-${HOME}/bin/}"
 
 	find "$(dirname "$0")/src" -type f -name '*.sh' -print0 | while read -d $'\0' filename; do
 		local out_filename="${filename##*/}"
@@ -80,7 +81,7 @@ function main {
 			out_filename="${out_filename%.sh}"
 		fi
 
-		fullpath="$(realpath "$binpath/$out_filename")"
+		fullpath="$(realpath "${binpath}/${out_filename}")"
 
 		if [[ -f "$fullpath" ]] && [[ -z "$OPT_FORCE" ]]; then
 			echo "'$fullpath' already exists but --force was not specified."
