@@ -6,6 +6,7 @@ OPT_SYNC=""
 OPT_UPDATE=""
 OPT_CLEAN=""
 OPT_ASK=""
+OPT_POWEROFF=""
 
 function usage {
 	cat <<-EOF
@@ -18,6 +19,7 @@ function usage {
 		  -u, --update        trigger PORTAGE_SET update.
 		  -c, --clean         remove old packages, binaries, sources
 		  -a, --ask           ask before operations
+		  -p, --poweroff      poweroff PC after succesful update. Needs -u to be enabled.
 		  -h, --help          print this help message
 
 		Argument PORTAGE_SET is any supported portage set. Defaults to @world.
@@ -58,7 +60,7 @@ function clean {
 }
 
 function main {
-	if ! options=$(getopt -o "hsuca" -l "help,sync,update,clean,ask" -- "$@"); then
+	if ! options=$(getopt -o "hsucap" -l "help,sync,update,clean,ask,poweroff" -- "$@"); then
 		die
 	fi
 
@@ -91,6 +93,11 @@ function main {
 			shift
 			;;
 
+		-p | --poweroff)
+			OPT_POWEROFF=y
+			shift
+			;;
+
 		--)
 			shift
 			break
@@ -108,6 +115,10 @@ function main {
 
 	if [[ $OPT_UPDATE == "y" ]]; then
 		update "${1:-@world}" || exit 1
+
+		if [[ $OPT_POWEROFF == "y" ]]; then
+			poweroff
+		fi
 	fi
 
 	if [[ $OPT_CLEAN == "y" ]]; then
