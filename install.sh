@@ -10,6 +10,7 @@ function usage {
 		  -b, --binpath          set the installation path for scripts, default: ~/bin
 		      --keep-extension   keep .sh extension for installed scripts
 		  -f, --force            overwrite existing files
+		  -i, --interactive      use fzf to select files to install
 		  -v, --verbose          print verbose output
 		  -h, --help             print this help message
 	EOF
@@ -22,8 +23,14 @@ function die {
 	exit 1
 }
 
+function installable_files {
+	local files="$(find "$(dirname "$1")/src" -type f -name '*.sh')"
+
+	echo "$files"
+}
+
 function main {
-	if ! options=$(getopt -o "hb:fv" -l "help,binpath:,keep-extension,force,verbose" -- "$@"); then
+	if ! options=$(getopt -o "hb:fvi" -l "help,binpath:,keep-extension,force,verbose,interactive" -- "$@"); then
 		die
 	fi
 
@@ -56,6 +63,11 @@ function main {
 			shift
 			;;
 
+		-i | --interactive)
+			local OPT_INTERACTIVE=y
+			shift
+			;;
+
 		--)
 			shift
 			break
@@ -74,7 +86,17 @@ function main {
 	# use eval to expand `~` from `OPT_BINPATH`
 	eval binpath="${OPT_BINPATH:-${HOME}/bin/}"
 
-	find "$(dirname "$0")/src" -type f -name '*.sh' -print0 | while read -d $'\0' filename; do
+	local installable="$(installable_files "$0")"
+
+	local files="$({
+		if [[ "$OPT_INTERACTIVE" == 'y' ]]; then
+			echo "$installable" | fzf -m
+		else
+			echo "$installable"
+		fi
+	})"
+
+	echo "$files" | while read -d $'\n' filename; do
 		local out_filename="${filename##*/}"
 
 		if ! [[ "$OPT_KEEP_EXT" == 'y' ]]; then
